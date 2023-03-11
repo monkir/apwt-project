@@ -2,76 +2,95 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import { addbusownerForm, addCustomerForm, deleteCustomerForm, findcustomerForm, loginForm, signupForm, updatebusownerForm, updateCustomerForm } from './employee.dto';
+import { EmployeeService } from './employee.service';
 
 @Controller('employee')
 export class EmployeeController {
+    constructor(private employeeService: EmployeeService){
+
+    }
+    //index
     @Get()
-    find():string{
-        return "this is employee panel"
+    find():any{
+        //return this.employeeService.getIndex()
+        return "Welcome to employee panel"
     }
+    @Post('signup')
+    @UsePipes(new ValidationPipe())
+    signup(@Body() signupDTO: signupForm)
+    {
+        return this.employeeService.signup(signupDTO)
+    }
+    //employee login
     @Post('login')
-    login(
-        @Body("id") id:string,
-        @Body("password") password:string):string{
-        return "Log in with id: "+id+" and password: "+password;
+    @UsePipes(new ValidationPipe())
+    login(@Body() loginDTO: loginForm):any
+    {
+        return this.employeeService.login(loginDTO);
     }
+    //Managing Customers
+    //find customer
+    @Get("showcustomers")
+    showcustomes():any
+    {
+        return this.employeeService.showcustomers();
+    }
+    //find customer
     @Get("findcustomer/:id")
-    findcustomer(@Param('id') id):string
+    @UsePipes(new ValidationPipe())
+    findcustomer(@Param() findCustomerDto: findcustomerForm):any
     {
-        return "employee trying to find customer with id: "+id;
+        return this.employeeService.findcustomer(findCustomerDto);
     }
-    @Get("findbusprovider/:id")
-    findbusprovider(@Param('id') id):string
-    {
-        return "employee trying to find bus provider with id: "+id;
-    }
+    //add customer
     @Post('addcustomer')
-    addcustomer(
-        @Body('name') name:string,
-        @Body('email') email:string,
-        @Body('phone') phone:string
-    ){
-        return "Employee is adding a customer with name: "+name+" email: "+email+" phone: "+phone;
+    @UsePipes(new ValidationPipe())
+    addcustomer(@Body() addCustomerDTO: addCustomerForm):any
+    {
+        return this.employeeService.addcustomer(addCustomerDTO);
     }
+    //Update Customer
     @Put('updatecustomer')
-    updatecustomer(
-        @Body('id') id:string,
-        @Body('name') name:string,
-        @Body('email') email:string,
-        @Body('phone') phone:string
-    ){
-        return "Employee is updating a customer with id: "+id+" name: "+name+" email: "+email+" phone: "+phone;
+    @UsePipes(new ValidationPipe())
+    updatecustomer(@Body() updateCustomerDTO:updateCustomerForm):any
+    {
+        return this.employeeService.updatecustomer(updateCustomerDTO)
     }
+    //delete customer
     @Delete('deletecustomer/:id')
-    deletecustomer(
-        @Param('id') id: string
-    ){
-        return "Employee is deleting a customer with id: "+id
+    @UsePipes(new ValidationPipe())
+    deletecustomer(@Param() deleteCustomerDTO: deleteCustomerForm):any
+    {
+        return this.employeeService.deletecustomer(deleteCustomerDTO)
     }
+    //Managing bus provider
+    //Finding bus provider
+    @Get("findbusprovider/:id")
+    @UsePipes(new ValidationPipe())
+    findbusprovider(@Param() findBusProviderDTO: findcustomerForm):any
+    {
+        return this.employeeService.findbusprovider(findBusProviderDTO)
+    }
+    //Adding bus provider
     @Post('addbusowner')
-    addbusowner(
-        @Body('name') name:string,
-        @Body('brta-license') brta_lcs:string
-    ){
-        return "Employee is adding a bus owner with name: "+name+" brta-license: "+brta_lcs
+    @UsePipes(new ValidationPipe())
+    addbusowner(@Body() addbusownerDTO: addbusownerForm):any
+    {
+        return this.employeeService.addbusowner(addbusownerDTO)
     }
-    // @Post('addbusowner')
-    // addbusowner(@Body() body):string{
-    //     return "Employee is adding a bus owner with name: "+body.name+" brta-license: "+body.brta_lcs
-    // }
+    //updating bus provider
     @Put('updatebusowner')
-    updatebusowner(
-        @Body('id') id:string,
-        @Body('name') name:string,
-        @Body('brta-license') brta_lcs:string
-    ){
-        return "Employee is adding a bus owner with id: "+id+" name: "+name+" brta-license: "+brta_lcs
+    @UsePipes(new ValidationPipe())
+    updatebusowner(@Body() updatebusownerDTO: updatebusownerForm)
+    {
+        return this.employeeService.updatebusowner(updatebusownerDTO)
     }
+    //deleting bus provider
     @Delete('deletebusowner/:id')
-    deletebusowner(
-        @Param('id') id: string
-    ){
-        return "Employee is deleting a bus owner with id: "+id
+    deletebusowner(@Param() deleteCustomerDTO: deleteCustomerForm)
+    {
+        return this.employeeService.deletebusowner(deleteCustomerDTO)
     }
 }
