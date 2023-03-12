@@ -1,23 +1,26 @@
-import { IsNotEmpty, IsInt, Length, IsEmail, IsNumberString, isNotEmpty } from "class-validator";
+import { IsNotEmpty, IsInt, Length, IsEmail, IsNumberString } from "class-validator";
 
 export class signupForm 
-{   
+{  
+    @IsNotEmpty()
+    @Length(8)
+    password: string;
+
     @IsNotEmpty()
     name: string;
 
     @IsNotEmpty()
     email: string;
-
+    
     @IsNotEmpty()
-    @Length(8)
-    password: string;
+    phone: string;
 
     @IsNotEmpty()
     address: string;
 }
 export class loginForm 
 {   
-   @IsNotEmpty()
+    @IsNotEmpty()
     email: string;
 
     @IsNotEmpty()
@@ -26,6 +29,7 @@ export class loginForm
 export class findcustomerForm 
 {   
    @IsNotEmpty()
+   @IsInt()
     id: string;
 }
 export class findBusProviderForm 
@@ -61,6 +65,9 @@ export class updateCustomerForm
     @IsNotEmpty()
     @IsNumberString()
     phone: string;
+
+    @IsNotEmpty()
+    address: string;
 }
 export class deleteCustomerForm
 {
@@ -71,6 +78,20 @@ export class addbusownerForm
 {
     @IsNotEmpty()
     name: string;
+    
+    @IsNotEmpty()
+    @IsEmail()
+    eamil: string;
+
+    @IsNotEmpty()
+    @IsNumberString()
+    phone: string;
+
+    @IsNotEmpty()
+    address: string;
+
+    @IsNotEmpty()
+    account: number;
 
     @IsNotEmpty()
     brtalicense: string;

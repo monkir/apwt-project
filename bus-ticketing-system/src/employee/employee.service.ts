@@ -2,8 +2,10 @@
 https://docs.nestjs.com/providers#services
 */
 
+import { MailerModule, MailerService } from '@nestjs-modules/mailer/dist';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { constants } from 'buffer';
 import { busownerEntity } from 'src/busowner/busowner.entity';
 import { customerEntity } from 'src/customer/customer.entity';
 import { Repository } from 'typeorm';
@@ -17,7 +19,8 @@ export class EmployeeService {
         @InjectRepository(busownerEntity)
         private busRepo: Repository<busownerEntity>,
         @InjectRepository(customerEntity)
-        private custRepo: Repository<customerEntity>
+        private custRepo: Repository<customerEntity>,
+        private mailerService: MailerService
     ){}
     getIndex():any
     {
@@ -34,7 +37,7 @@ export class EmployeeService {
         */
        return this.empRepo.insert(signupDTO)
     }
-    login(loginDTO):any
+    async login(loginDTO):Promise<boolean>
     {
         /*
         return "Login with email: "+loginDTO.email
@@ -42,7 +45,10 @@ export class EmployeeService {
         */
        //userdetails: employeeEntity= this.empRepo.findOneBy({email: loginDTO.email, password: loginDTO.password})
        //var result = this.empRepo.findOneBy({email: loginDTO.email})
-       return this.empRepo.findOneBy({email: loginDTO.email})
+
+       const tableData= await this.empRepo.findOneBy({email: loginDTO.email})
+       return loginDTO.password == tableData['password']
+       //return tableData.password
     }
     showcustomers():any
     {
@@ -93,5 +99,13 @@ export class EmployeeService {
     deletebusowner(deleteCustomerDTO):any
     {
         return "Employee is deleting a bus owner with id: "+deleteCustomerDTO.id
+    }
+    async sendmail():Promise<any>
+    {
+        return await this.mailerService.sendMail({
+            to: 'monkirchowdhury@gmail.com',
+            subject: 'Bus Ticketing System',
+            text: 'Welcome to Bus Ticketing System'
+        })
     }
 }

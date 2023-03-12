@@ -2,8 +2,10 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, UsePipes,Session, ValidationPipe, UnauthorizedException } from '@nestjs/common';
+import session, {  } from 'express-session';
 import { addbusownerForm, addCustomerForm, deleteCustomerForm, findcustomerForm, loginForm, signupForm, updatebusownerForm, updateCustomerForm } from './employee.dto';
+import { sessionGuard } from './employee.guard';
 import { EmployeeService } from './employee.service';
 
 @Controller('employee')
@@ -26,13 +28,22 @@ export class EmployeeController {
     //employee login
     @Post('login')
     @UsePipes(new ValidationPipe())
-    login(@Body() loginDTO: loginForm):any
+    login(@Body() loginDTO: loginForm, @Session() session ):any
     {
-        return this.employeeService.login(loginDTO);
+        if (this.employeeService.login(loginDTO)){
+            // session.email=loginDTO.email;
+            session.email = loginDTO.email;
+            return {'Message': 'Successfully Logged in'};
+        }
+        else
+        {
+            return {'Message': 'Invalid Creditential'}
+        }
     }
     //Managing Customers
     //find customer
     @Get("showcustomers")
+    @UseGuards(sessionGuard)
     showcustomes():any
     {
         return this.employeeService.showcustomers();
@@ -92,5 +103,20 @@ export class EmployeeController {
     deletebusowner(@Param() deleteCustomerDTO: deleteCustomerForm)
     {
         return this.employeeService.deletebusowner(deleteCustomerDTO)
+    }
+    @Get('logout')
+    logout(@Session() session){
+        if(session.destroy()){
+            return {'Message':'Successfully Loged out'}
+        }
+        else{
+            throw new UnauthorizedException("invalid actions"); 
+        }
+    }
+    //Send mail
+    @Post('sendmail')
+    sendmail()
+    {
+        return this.employeeService.sendmail()
     }
 }

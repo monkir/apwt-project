@@ -8,12 +8,15 @@ export class employeeEntity
     id: number;
 
     @Column()
+    password: string;
+
+    @Column()
     name: string;
 
-    @Column()
+    @Column({unique: true})
     email: string;
 
-    @Column()
+    @Column({unique: true})
     phone: string;
 
     @Column()

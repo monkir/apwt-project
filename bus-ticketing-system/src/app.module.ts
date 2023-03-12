@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { busownerModule } from './busowner/busowner.module';
 import { customerModule } from './customer/busowner.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -21,6 +22,18 @@ import { customerModule } from './customer/busowner.module';
           autoLoadEntities: true,
           synchronize: true,
         }),
+        MailerModule.forRoot({
+          transport:{
+            host: 'smtp.gmail.com',
+            port: 465,
+            ignoreTLS: true,
+            secure: true,
+            auth:{
+              user: 'bus.ticketing.system.atp@gmail.com',
+              pass: 'mosqlzbovzbtuofj'
+            }
+          }
+        })
       ],
   controllers: [AppController],
   providers: [AppService],
