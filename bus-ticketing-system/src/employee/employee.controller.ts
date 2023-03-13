@@ -2,8 +2,9 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, UsePipes,Session, ValidationPipe, UnauthorizedException } from '@nestjs/common';
-import session, {  } from 'express-session';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, UsePipes,Session, ValidationPipe, UnauthorizedException, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 import { addbusownerForm, addCustomerForm, deleteCustomerForm, findcustomerForm, loginForm, signupForm, updatebusownerForm, updateCustomerForm } from './employee.dto';
 import { sessionGuard } from './employee.guard';
 import { EmployeeService } from './employee.service';
@@ -21,16 +22,30 @@ export class EmployeeController {
     }
     @Post('signup')
     @UsePipes(new ValidationPipe())
-    signup(@Body() signupDTO: signupForm)
+    @UseInterceptors(FileInterceptor('myfile',{
+        storage:diskStorage({
+            destination: './uploads',
+            filename: function (req, file, cb) {
+                cb(null,Date.now()+file.originalname)
+            }
+        })
+    }))
+    signup(@Body() signupDTO: signupForm, @UploadedFile(  new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 160000 }),
+          new FileTypeValidator({ fileType: 'png|jpg|jpeg|' }),
+        ],
+      }),) file: Express.Multer.File)
     {
+        signupDTO.filename=file.filename;
         return this.employeeService.signup(signupDTO)
     }
     //employee login
     @Post('login')
     @UsePipes(new ValidationPipe())
-    login(@Body() loginDTO: loginForm, @Session() session ):any
+    async login(@Body() loginDTO: loginForm, @Session() session ):Promise<any>
     {
-        if (this.employeeService.login(loginDTO)){
+        if (await this.employeeService.login(loginDTO)){
             // session.email=loginDTO.email;
             session.email = loginDTO.email;
             return {'Message': 'Successfully Logged in'};

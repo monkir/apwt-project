@@ -17,6 +17,7 @@ export class signupForm
 
     @IsNotEmpty()
     address: string;
+    filename: string;
 }
 export class loginForm 
 {   

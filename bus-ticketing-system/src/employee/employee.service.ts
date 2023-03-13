@@ -5,11 +5,11 @@ https://docs.nestjs.com/providers#services
 import { MailerModule, MailerService } from '@nestjs-modules/mailer/dist';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { constants } from 'buffer';
 import { busownerEntity } from 'src/busowner/busowner.entity';
 import { customerEntity } from 'src/customer/customer.entity';
 import { Repository } from 'typeorm';
 import { employeeEntity } from './employee.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class EmployeeService {
@@ -27,28 +27,21 @@ export class EmployeeService {
         //return "this is employee panel";
         return this.empRepo.find()
     }
-    signup(signupDTO):any
+    async signup(signupDTO):Promise<any>
     {
-        /*
-        return "Signup with name: "+signupDTO.name
-        +" email: "+signupDTO.email
-        +" and password: "+signupDTO.password
-        +" address: "+signupDTO.address
-        */
-       return this.empRepo.insert(signupDTO)
+        const salt = await bcrypt.genSalt();
+        const hash = await bcrypt.hash(signupDTO.password,salt);
+        signupDTO.password=hash;
+        return this.empRepo.insert(signupDTO)
+
     }
     async login(loginDTO):Promise<boolean>
-    {
-        /*
-        return "Login with email: "+loginDTO.email
-        +" and password: "+loginDTO.password;
-        */
-       //userdetails: employeeEntity= this.empRepo.findOneBy({email: loginDTO.email, password: loginDTO.password})
-       //var result = this.empRepo.findOneBy({email: loginDTO.email})
-
+    { 
+       if(await this.empRepo.count({where: {email: loginDTO.email}})==0){
+        return false;
+       }
        const tableData= await this.empRepo.findOneBy({email: loginDTO.email})
-       return loginDTO.password == tableData['password']
-       //return tableData.password
+       return bcrypt.compare(loginDTO.password, tableData.password)
     }
     showcustomers():any
     {

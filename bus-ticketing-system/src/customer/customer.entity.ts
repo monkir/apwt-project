@@ -7,6 +7,9 @@ export class customerEntity
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Column({default: '123' })
+    password: string;
+
     @Column()
     name: string;
 
@@ -16,7 +19,7 @@ export class customerEntity
     @Column({unique:true})
     phone: string;
 
-    @Column({default: 'none', })
+    @Column({default: 'none' })
     address: string;
 
     @ManyToOne(()=>employeeEntity, (employeeEntity)=>employeeEntity.customers)

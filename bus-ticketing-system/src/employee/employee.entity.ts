@@ -22,6 +22,9 @@ export class employeeEntity
     @Column()
     address: string;
 
+    @Column({default: 'none' })
+    filename: string;
+
     @OneToMany(()=>customerEntity, (customerEntity)=>customerEntity.employee)
     customers: customerEntity[];
 }
