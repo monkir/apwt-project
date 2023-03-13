@@ -19,8 +19,11 @@ export class customerEntity
     @Column({unique:true})
     phone: string;
 
-    @Column({default: 'none' })
+    @Column()
     address: string;
+
+    @Column({default: 'none.png'})
+    profile: string;
 
     @ManyToOne(()=>employeeEntity, (employeeEntity)=>employeeEntity.customers)
     employee: employeeEntity

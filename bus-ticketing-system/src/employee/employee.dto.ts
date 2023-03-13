@@ -17,6 +17,7 @@ export class signupForm
 
     @IsNotEmpty()
     address: string;
+    
     filename: string;
 }
 export class loginForm 
@@ -50,6 +51,14 @@ export class addCustomerForm
     @IsNotEmpty()
     @IsNumberString()
     phone: string;
+
+    @IsNotEmpty()
+    address: string;
+
+    password: string;
+    profile:string;
+    employee:number;
+    
 }
 export class updateCustomerForm
 {
@@ -69,6 +78,14 @@ export class updateCustomerForm
 
     @IsNotEmpty()
     address: string;
+
+    @IsNotEmpty()
+    password: string;
+
+    @IsNotEmpty()
+    profile:string;
+
+    employee:number;
 }
 export class deleteCustomerForm
 {

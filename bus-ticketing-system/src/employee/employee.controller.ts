@@ -22,7 +22,7 @@ export class EmployeeController {
     }
     @Post('signup')
     @UsePipes(new ValidationPipe())
-    @UseInterceptors(FileInterceptor('myfile',{
+    @UseInterceptors(FileInterceptor('profile',{
         storage:diskStorage({
             destination: './uploads',
             filename: function (req, file, cb) {
@@ -30,12 +30,14 @@ export class EmployeeController {
             }
         })
     }))
-    signup(@Body() signupDTO: signupForm, @UploadedFile(  new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 160000 }),
-          new FileTypeValidator({ fileType: 'png|jpg|jpeg|' }),
-        ],
-      }),) file: Express.Multer.File)
+    signup(
+        @Body() signupDTO: signupForm, 
+        @UploadedFile(  new ParseFilePipe({
+            validators: [
+            new MaxFileSizeValidator({ maxSize: 160000 }),
+            new FileTypeValidator({ fileType: 'png|jpg|jpeg|' }),
+            ],
+        }),) file: Express.Multer.File)
     {
         signupDTO.filename=file.filename;
         return this.employeeService.signup(signupDTO)
@@ -48,6 +50,8 @@ export class EmployeeController {
         if (await this.employeeService.login(loginDTO)){
             // session.email=loginDTO.email;
             session.email = loginDTO.email;
+            session.userid=(await this.employeeService.getIDbyEmail(loginDTO.email)).toString()
+            session.user='admin'
             return {'Message': 'Successfully Logged in'};
         }
         else
@@ -72,16 +76,37 @@ export class EmployeeController {
     }
     //add customer
     @Post('addcustomer')
+    @UseGuards(sessionGuard)
+    @UseInterceptors(FileInterceptor('profile',{
+        storage:diskStorage({
+            destination: './uploads',
+            filename: function (req, file, cb) {
+                cb(null,Date.now()+file.originalname)
+            }
+        })
+    }))
     @UsePipes(new ValidationPipe())
-    addcustomer(@Body() addCustomerDTO: addCustomerForm):any
+    @UseGuards(sessionGuard)
+    addcustomer(@Body() addCustomerDTO: addCustomerForm, @Session() session,
+    @UploadedFile(  new ParseFilePipe({
+        validators: [
+        new MaxFileSizeValidator({ maxSize: 160000 }),
+        new FileTypeValidator({ fileType: 'png|jpg|jpeg|' }),
+        ],
+    }),) file: Express.Multer.File):any
     {
+        addCustomerDTO.profile=file.filename;
+        addCustomerDTO.employee=session.userid
         return this.employeeService.addcustomer(addCustomerDTO);
     }
     //Update Customer
     @Put('updatecustomer')
     @UsePipes(new ValidationPipe())
-    updatecustomer(@Body() updateCustomerDTO:updateCustomerForm):any
+    @UseGuards(sessionGuard)
+    updatecustomer(@Body() updateCustomerDTO:updateCustomerForm, @Session() session):any
     {
+        updateCustomerDTO.employee=session.userid;
+        console.log(session.userid)
         return this.employeeService.updatecustomer(updateCustomerDTO)
     }
     //delete customer

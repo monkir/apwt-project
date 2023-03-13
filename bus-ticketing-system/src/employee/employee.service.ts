@@ -10,6 +10,7 @@ import { customerEntity } from 'src/customer/customer.entity';
 import { Repository } from 'typeorm';
 import { employeeEntity } from './employee.entity';
 import * as bcrypt from 'bcrypt';
+import { randomInt } from 'crypto';
 
 @Injectable()
 export class EmployeeService {
@@ -35,13 +36,18 @@ export class EmployeeService {
         return this.empRepo.insert(signupDTO)
 
     }
-    async login(loginDTO):Promise<boolean>
+    async login(loginDTO):Promise<any>
     { 
        if(await this.empRepo.count({where: {email: loginDTO.email}})==0){
         return false;
        }
        const tableData= await this.empRepo.findOneBy({email: loginDTO.email})
        return bcrypt.compare(loginDTO.password, tableData.password)
+    }
+    async getIDbyEmail(email):Promise<any>
+    { 
+        const tableData= await this.empRepo.findOneBy({email: email})
+       return tableData.id
     }
     showcustomers():any
     {
@@ -58,19 +64,53 @@ export class EmployeeService {
         //return "employee trying to find bus provider with id: "+findBusProviderDTO.id;
         return this.busRepo.findOneBy({id:findBusProviderDTO.id})
     }
-    addcustomer(addCustomerDTO):any
+    makeid(length) {
+        let result = '';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const charactersLength = characters.length;
+        let counter = 0;
+        while (counter < length) {
+          result += characters.charAt(Math.floor(Math.random() * charactersLength));
+          counter += 1;
+        }
+        return result;
+    }
+    async addcustomer(addCustomerDTO):Promise<any>
     {
         /*
         return "Employee is adding a customer with name: "+addCustomerDTO.name
         +" email: "+addCustomerDTO.email+" phone: "+addCustomerDTO.phone;
         */
-       return this.custRepo.insert(addCustomerDTO)
+       const pass = this.makeid(8)
+       const salt = await bcrypt.genSalt();
+        const hash = await bcrypt.hash(pass,salt);
+        addCustomerDTO.password=hash;
+        await this.mailerService.sendMail({
+            to: addCustomerDTO.email,
+            subject: 'Password of your account in Bus Ticketing System',
+            text: 'Welcome to Bus Ticketing System\n'+
+                'Your account is: '+addCustomerDTO.email+'\n'+
+                'Your password is: '+pass
+        })
+        return this.custRepo.insert(addCustomerDTO)
     }
-    updatecustomer(updateCustomerDTO):any
+    async updatecustomer(updateCustomerDTO):Promise<any>
     {
         // return "Employee is updating a customer with id: "+updateCustomerDTO.id
         // +" name: "+updateCustomerDTO.name+" email: "+updateCustomerDTO.email
         // +" phone: "+updateCustomerDTO.phone;
+        const pass = updateCustomerDTO.password
+       const salt = await bcrypt.genSalt();
+        const hash = await bcrypt.hash(pass,salt);
+        updateCustomerDTO.password=hash;
+        await this.mailerService.sendMail({
+            to: updateCustomerDTO.email,
+            subject: 'Updated Password of your account in Bus Ticketing System',
+            text: 'Welcome to Bus Ticketing System\n'+
+                'Your account is: '+updateCustomerDTO.email+'\n'+
+                'Your password is: '+pass
+        })
+        console.log('test')
         return this.custRepo.update(updateCustomerDTO.id, updateCustomerDTO)
     }
     deletecustomer(deleteCustomerDTO):any
