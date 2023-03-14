@@ -44,10 +44,15 @@ export class EmployeeService {
        const tableData= await this.empRepo.findOneBy({email: loginDTO.email})
        return bcrypt.compare(loginDTO.password, tableData.password)
     }
-    async getIDbyEmail(email):Promise<any>
+    async EmpgetIDbyEmail(email):Promise<string>
     { 
         const tableData= await this.empRepo.findOneBy({email: email})
-       return tableData.id
+       return tableData.id.toString()
+    }
+    async CustgetIDbyEmail(email):Promise<string>
+    { 
+        const tableData= await this.custRepo.findOneBy({email: email})
+       return tableData.id.toString()
     }
     showcustomers():any
     {
@@ -64,7 +69,7 @@ export class EmployeeService {
         //return "employee trying to find bus provider with id: "+findBusProviderDTO.id;
         return this.busRepo.findOneBy({id:findBusProviderDTO.id})
     }
-    makeid(length) {
+    makepass(length) {
         let result = '';
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         const charactersLength = characters.length;
@@ -81,7 +86,7 @@ export class EmployeeService {
         return "Employee is adding a customer with name: "+addCustomerDTO.name
         +" email: "+addCustomerDTO.email+" phone: "+addCustomerDTO.phone;
         */
-       const pass = this.makeid(8)
+       const pass = this.makepass(8)
        const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(pass,salt);
         addCustomerDTO.password=hash;
@@ -90,7 +95,11 @@ export class EmployeeService {
             subject: 'Password of your account in Bus Ticketing System',
             text: 'Welcome to Bus Ticketing System\n'+
                 'Your account is: '+addCustomerDTO.email+'\n'+
-                'Your password is: '+pass
+                'Your password is: '+pass+
+                'Your name is: '+addCustomerDTO.name+
+                'Your phone is: '+addCustomerDTO.phone+
+                'Your address is: '+addCustomerDTO.address+
+                'Your employee is: '+addCustomerDTO.employee
         })
         return this.custRepo.insert(addCustomerDTO)
     }
@@ -108,7 +117,11 @@ export class EmployeeService {
             subject: 'Updated Password of your account in Bus Ticketing System',
             text: 'Welcome to Bus Ticketing System\n'+
                 'Your account is: '+updateCustomerDTO.email+'\n'+
-                'Your password is: '+pass
+                'Your password is: '+pass+
+                'Your name is: '+updateCustomerDTO.name+
+                'Your phone is: '+updateCustomerDTO.phone+
+                'Your address is: '+updateCustomerDTO.address+
+                'Your employee is: '+updateCustomerDTO.employee
         })
         console.log('test')
         return this.custRepo.update(updateCustomerDTO.id, updateCustomerDTO)

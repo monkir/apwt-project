@@ -50,7 +50,7 @@ export class EmployeeController {
         if (await this.employeeService.login(loginDTO)){
             // session.email=loginDTO.email;
             session.email = loginDTO.email;
-            session.userid=(await this.employeeService.getIDbyEmail(loginDTO.email)).toString()
+            session.userid=(await this.employeeService.EmpgetIDbyEmail(loginDTO.email)).toString()
             session.user='admin'
             return {'Message': 'Successfully Logged in'};
         }
@@ -103,10 +103,12 @@ export class EmployeeController {
     @Put('updatecustomer')
     @UsePipes(new ValidationPipe())
     @UseGuards(sessionGuard)
-    updatecustomer(@Body() updateCustomerDTO:updateCustomerForm, @Session() session):any
+    async updatecustomer(@Body() updateCustomerDTO:updateCustomerForm, @Session() session):Promise<any>
     {
         updateCustomerDTO.employee=session.userid;
+        updateCustomerDTO.id=await this.employeeService.CustgetIDbyEmail(updateCustomerDTO.email);
         console.log(session.userid)
+        console.log(updateCustomerDTO.id)
         return this.employeeService.updatecustomer(updateCustomerDTO)
     }
     //delete customer

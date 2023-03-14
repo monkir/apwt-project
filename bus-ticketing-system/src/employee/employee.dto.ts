@@ -62,7 +62,7 @@ export class addCustomerForm
 }
 export class updateCustomerForm
 {
-    @IsNotEmpty()
+    // @IsNotEmpty()
     id: string;
 
     @IsNotEmpty()
